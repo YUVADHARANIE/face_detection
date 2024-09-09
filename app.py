@@ -4,10 +4,10 @@ import streamlit as st
 import numpy as np
 import os
 
-# Function to detect cars in the video
-def detect_cars_in_video(video_path, cascade_path):
+# Function to detect faces in the video
+def detect_faces_in_video(video_path, cascade_path):
     cap = cv2.VideoCapture(video_path)
-    car_cascade = cv2.CascadeClassifier(cascade_path)
+    face_cascade = cv2.CascadeClassifier(cascade_path)
     
     # Create a temporary file to save the processed video
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
@@ -22,10 +22,10 @@ def detect_cars_in_video(video_path, cascade_path):
             break
         
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cars = car_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
         
-        for (x, y, w, h) in cars:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
         
         video_writer.write(frame)
     
@@ -35,7 +35,7 @@ def detect_cars_in_video(video_path, cascade_path):
     return temp_file_path
 
 # Streamlit App Interface
-st.title('Car Detection in Video by yuva')
+st.title('Face Detection in Video')
 
 uploaded_video = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"])
 
@@ -47,12 +47,12 @@ if uploaded_video is not None:
         tfile.write(uploaded_video.read())
         tfile_path = tfile.name
     
-    # Detect cars in the video
-    cascade_src = 'cars.xml'  # Path to the cars.xml file
-    processed_video_path = detect_cars_in_video(tfile_path, cascade_src)
+    # Detect faces in the video
+    cascade_src = 'haarcascade_frontalface_default.xml'  # Path to the Haar Cascade for face detection
+    processed_video_path = detect_faces_in_video(tfile_path, cascade_src)
     
     # Provide a download link for the processed video
-    st.text("Car detection completed. You can download the processed video using the link below:")
+    st.text("Face detection completed. You can download the processed video using the link below:")
     with open(processed_video_path, "rb") as f:
         st.download_button(
             label="Download Processed Video",
